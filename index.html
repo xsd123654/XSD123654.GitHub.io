@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广播剧收听平台</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: linear-gradient(90deg, #4a90e2 60%, #357ab7 100%);
+            color: #fff;
+            padding: 2rem 1rem 1rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .admin-btn {
+            position: absolute;
+            right: 2rem;
+            top: 2rem;
+            background: #fff;
+            color: #4a90e2;
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(74,144,226,0.08);
+            transition: background 0.2s, color 0.2s;
+        }
+        .admin-btn:hover {
+            background: #4a90e2;
+            color: #fff;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            padding: 2.5rem 2rem 2rem 2rem;
+            position: relative;
+        }
+        h1 {
+            margin: 0 0 1rem 0;
+            letter-spacing: 2px;
+        }
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 20px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .search-bar input:focus {
+            border: 1.5px solid #4a90e2;
+        }
+        .search-bar select {
+            padding: 0.7rem 1.2rem;
+            border-radius: 20px;
+            border: 1px solid #d0d0d0;
+            font-size: 1rem;
+            outline: none;
+        }
+        .drama-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+        .drama-item {
+            background: #f8fbff;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(74,144,226,0.07);
+            padding: 1.5rem 1rem 1rem 1rem;
+            margin: 0;
+            border: none;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .drama-item:hover {
+            box-shadow: 0 8px 24px rgba(74,144,226,0.15);
+            transform: translateY(-4px) scale(1.02);
+        }
+        .drama-title {
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #357ab7;
+        }
+        .drama-desc {
+            color: #666;
+            margin-bottom: 1rem;
+            min-height: 2.2em;
+        }
+        .drama-category {
+            display: inline-block;
+            background: #e0eafc;
+            color: #4a90e2;
+            font-size: 0.9em;
+            border-radius: 10px;
+            padding: 0.2em 0.8em;
+            margin-bottom: 0.7em;
+        }
+        audio {
+            width: 100%;
+            outline: none;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            .drama-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="admin-btn" onclick="alert('后台管理功能开发中，敬请期待！')">后台管理</button>
+        <h1>广播剧收听平台</h1>
+        <p>随时随地，畅听精彩广播剧</p>
+    </header>
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索剧名或简介..." oninput="filterDramas()">
+            <select id="categorySelect" onchange="filterDramas()">
+                <option value="all">全部分类</option>
+                <option value="都市">都市</option>
+                <option value="悬疑">悬疑</option>
+                <option value="奇幻">奇幻</option>
+                <option value="历史">历史</option>
+                <option value="其他">其他</option>
+            </select>
+        </div>
+        <ul class="drama-list" id="dramaList">
+            <!-- 广播剧内容由JS渲染 -->
+        </ul>
+    </div>
+    <script>
+    // 广播剧数据，可扩展
+    const dramas = [
+        {
+            title: '夜色倾城',
+            desc: '一段发生在都市夜色下的温情故事。',
+            src: 'audio/sample1.mp3',
+            category: '都市'
+        },
+        {
+            title: '迷雾追踪',
+            desc: '悬疑推理，真相扑朔迷离。',
+            src: 'audio/sample2.mp3',
+            category: '悬疑'
+        },
+        {
+            title: '魔法之森',
+            desc: '奇幻冒险，勇敢与成长。',
+            src: 'audio/sample3.mp3',
+            category: '奇幻'
+        },
+        {
+            title: '大明风云',
+            desc: '历史长河中的英雄传说。',
+            src: 'audio/sample4.mp3',
+            category: '历史'
+        },
+        {
+            title: '星空下的约定',
+            desc: '温馨治愈，适合睡前聆听。',
+            src: 'audio/sample5.mp3',
+            category: '其他'
+        }
+    ];
+
+    function renderDramas(list) {
+        const ul = document.getElementById('dramaList');
+        ul.innerHTML = '';
+        if (list.length === 0) {
+            ul.innerHTML = '<li style="text-align:center;color:#aaa;padding:2em 0;">未找到相关广播剧</li>';
+            return;
+        }
+        list.forEach(drama => {
+            const li = document.createElement('li');
+            li.className = 'drama-item';
+            li.innerHTML = `
+                <div class="drama-category">${drama.category}</div>
+                <div class="drama-title">${drama.title}</div>
+                <div class="drama-desc">${drama.desc}</div>
+                <audio controls preload="none">
+                    <source src="${drama.src}" type="audio/mpeg">
+                    您的浏览器不支持 audio 元素。
+                </audio>
+            `;
+            ul.appendChild(li);
+        });
+    }
+
+    function filterDramas() {
+        const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+        const category = document.getElementById('categorySelect').value;
+        let filtered = dramas.filter(d => {
+            const matchKeyword = d.title.toLowerCase().includes(keyword) || d.desc.toLowerCase().includes(keyword);
+            const matchCategory = category === 'all' || d.category === category;
+            return matchKeyword && matchCategory;
+        });
+        renderDramas(filtered);
+    }
+
+    // 首次渲染
+    renderDramas(dramas);
+    </script>
+</body>
+</html>
